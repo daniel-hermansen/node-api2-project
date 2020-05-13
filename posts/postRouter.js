@@ -16,14 +16,15 @@ router.get('/', (req, res) => {
 });
 
 router.get('/:id', (req, res) => {
-    Posts.findById(req.params.id)
+    const { id } = req.params;
+    Posts.findById(id)
     .then(post => {
-        if(post){
-            res.status(200).json(post);
-        } else {
+        if(!post.length){
             res.status(404).json({ 
                 errorMessage: "The post with the specified ID does not exist."
             })
+        } else {
+            res.status(200).json(post);
         }
     })
     .catch(error => {
@@ -35,22 +36,23 @@ router.get('/:id', (req, res) => {
 });
 
 router.get('/:id/comments', (req, res) => {
-    Posts.findPostComments(req.params.id)
-    .then(comments => {
-        if(comments){
-            res.status(200).json(comments)
-        } else {
-            res.status(404).json({
-                errorMessage: "The post with the specified ID does not exist."
-            })
-        }
-    })
-    .catch(error => {
-        console.log(error);
-        res.status(500).json({
-            errorMessage: "The comments information could not be retrieved."
+    const { id } = req.params;
+    Posts.findPostComments(id)
+        .then(post => {
+            if(!post.length){
+                res.status(404).json({
+                    errorMessage: "The post with the specified ID does not exist."
+                })
+            } else {
+                res.status(200).json(post)
+            }
         })
-    })
+        .catch(error => {
+            console.log(error);
+            res.status(500).json({
+                errorMessage: "The comments information could not be retrieved."
+            })
+        })
 })
 
 router.post('/', (req, res) => {
@@ -95,10 +97,11 @@ router.post('/:id/comments', (req, res) => {
                 res.status(201).json(comment);
                 })
                 .catch(error => {
-                res.status(500).json({
-                    error:
-                    'There was an error while saving the comment to the database'
-                });
+                    error,
+                    res.status(500).json({
+                        error:
+                        'There was an error while saving the comment to the database'
+                    });
                 });
             }
         })
